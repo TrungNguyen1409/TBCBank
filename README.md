@@ -6,6 +6,8 @@ In this exercise, you will build a **simple Savings Account Smart Contract** usi
 
 By the end of this assignment, you will understand fundamental Solidity concepts, including:
 - ✅ Writing and deploying an **ERC20 Token**
+- ✅ Getting test ETH and deploying on **Sepolia Testnet**
+- ✅ Connecting **MetaMask** and deploying a contract
 - ✅ Interacting with ERC20 tokens in a contract
 - ✅ State variables and mappings
 - ✅ Functions and visibility modifiers
@@ -18,14 +20,23 @@ By the end of this assignment, you will understand fundamental Solidity concepts
 
 ## 🛠 Prerequisites
 Before starting, make sure you have:
-- A computer with internet access 🌍
+- A **MetaMask Wallet** installed and set up
+- **Sepolia Test ETH** (get some from [Sepolia Faucet](https://sepoliafaucet.com/))
 - Basic understanding of **Ethereum and Smart Contracts**
 - A web browser (Chrome, Firefox, Edge, etc.)
 - No installation required! We’ll use **Remix IDE** (online).
 
 ---
 
-## 🚀 Step 1: Creating and Deploying an ERC20 Token
+## 🚀 Step 1: Getting Sepolia Test ETH
+1. Open **MetaMask** and switch to the **Sepolia Test Network**.
+2. Visit [Sepolia Faucet](https://sepoliafaucet.com/).
+3. Enter your MetaMask wallet address and request test ETH.
+4. Wait for the transaction to complete and check your balance in MetaMask.
+
+---
+
+## 🚀 Step 2: Creating and Deploying an ERC20 Token
 Before building the savings contract, you need to **deploy your own ERC20 token**. Follow these steps:
 
 ### 🔹 Open Remix IDE
@@ -47,20 +58,22 @@ contract MyToken is ERC20 {
 }
 ```
 
-### 🔹 Steps to Deploy
+### 🔹 Steps to Deploy on Sepolia
 1. Click on the **Solidity Compiler** tab (🛠 icon) in the left sidebar.
 2. Select **Compiler version `0.8.20`**.
 3. Click **Compile MyToken.sol** (🔨).
 4. Go to the **Deploy & Run Transactions** tab (🚀 icon).
-5. Select **JavaScript VM (London)** as the environment.
-6. Enter an initial supply (e.g., `1000000`) in the constructor field.
-7. Click **Deploy**.
+5. Under **Environment**, select **Injected Provider - MetaMask**.
+6. Ensure MetaMask is connected to **Sepolia Testnet**.
+7. Enter an initial supply (e.g., `1000000`) in the constructor field.
+8. Click **Deploy** and confirm the transaction in MetaMask.
+9. Copy the deployed contract address.
 
 **✅ Expected Output:** Your token contract will be deployed, and the address will be displayed.
 
 ---
 
-## 🚀 Step 2: Writing the Savings Account Contract
+## 🚀 Step 3: Writing the Savings Account Contract
 Now that you have deployed your ERC20 token, use it in your **Savings Account Contract**.
 
 ### 🔹 Open Remix and Create a New File
@@ -114,28 +127,23 @@ contract SavingsAccount {
         
         emit Withdrawn(msg.sender, amount);
     }
-
-    function applyInterest() external onlyOwner {
-        for (uint256 i = 0; i < 5; i++) {  // Placeholder, students need to fix this logic
-            // TODO: Apply interest to all users
-        }
-    }
 }
 ```
 
 ---
 
-## 🛠 Step 3: Deploying the Savings Contract
+## 🛠 Step 4: Deploying the Savings Contract on Sepolia
 1. Click on the **Solidity Compiler** tab and compile `SavingsAccount.sol`.
 2. Go to **Deploy & Run Transactions**.
-3. In the constructor field, enter the **address of the ERC20 token you deployed earlier**.
-4. Click **Deploy**.
+3. Under **Environment**, select **Injected Provider - MetaMask** and connect to **Sepolia Testnet**.
+4. In the constructor field, enter the **address of the ERC20 token you deployed earlier**.
+5. Click **Deploy** and confirm the transaction in MetaMask.
 
 **✅ Expected Output:** The contract should deploy successfully.
 
 ---
 
-## 🎯 Step 4: Interacting with the Contract
+## 🎯 Step 5: Interacting with the Contract
 
 ### 🔹 1. Approve and Deposit Tokens
 - First, approve the contract to spend tokens on your behalf using `approve()` from your ERC20 contract.
@@ -150,27 +158,7 @@ contract SavingsAccount {
 
 ---
 
-### 🔹 2. Check Balance
-- Click on `checkBalance()`.
-
-**✅ Expected Output:**  
-- It should return **100 tokens** (or the amount deposited).
-
----
-
-### 🔹 3. Withdraw Tokens
-- Locate `withdraw(uint256 amount)`.
-- Enter **50 tokens**.
-- Click **transact**.
-
-**✅ Expected Output:**  
-- The withdrawal should succeed.
-- The balance should decrease.
-- A `Withdrawn` event should be emitted.
-
----
-
-## 📩 Step 5: Submitting Your Assignment
+## 📩 Step 6: Submitting Your Assignment
 To complete the assignment:
 1. **Submit your modified Solidity code**.
 2. **Include screenshots** of your Remix transactions.
@@ -184,9 +172,9 @@ To complete the assignment:
 | Criteria | Points |
 |----------|--------|
 | ERC20 Token successfully deployed | 20 |
+| Contract deployed on Sepolia using MetaMask | 20 |
 | `deposit()`, `checkBalance()`, and `withdraw()` work correctly | 40 |
 | Events are emitted properly | 10 |
-| `onlyOwner` and interest function implemented correctly | 20 |
 | Code readability (comments, clean structure) | 10 |
 
 **Total: 100 Points**
@@ -194,5 +182,5 @@ To complete the assignment:
 ---
 
 ## 🎯 Summary
-🎉 Congratulations! You’ve successfully deployed an ERC20 token and built a savings account contract that interacts with it. 🚀
+🎉 Congratulations! You’ve successfully deployed an ERC20 token and built a savings account contract that interacts with it on **Sepolia Testnet**. 🚀
 
