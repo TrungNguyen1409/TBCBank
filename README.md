@@ -1,13 +1,14 @@
-# 📜 Solidity Homework: Savings Account Smart Contract
+# 📜 Solidity Homework: Savings Account Smart Contract with Custom ERC20 Token
 
 ## 🔹 Introduction
-Welcome to your **first Solidity assignment!** 🎉  
-In this exercise, you will build a **simple Savings Account Smart Contract** using Solidity and the **Remix IDE**. This contract will allow users to **deposit ETH**, **withdraw ETH**, and **check their balance**. Additionally, an **interest function** will be implemented for advanced students.
+Welcome to your **Solidity assignment!** 🎉  
+In this exercise, you will build a **simple Savings Account Smart Contract** using Solidity and the **Remix IDE**. Before that, you will first create your own **ERC20 token**, which will be used as the deposit currency for your savings account.
 
 By the end of this assignment, you will understand fundamental Solidity concepts, including:
+- ✅ Writing and deploying an **ERC20 Token**
+- ✅ Interacting with ERC20 tokens in a contract
 - ✅ State variables and mappings
 - ✅ Functions and visibility modifiers
-- ✅ Payable functions and transactions
 - ✅ Events and logging
 - ✅ Require statements for validation
 - ✅ Contract deployment and interaction in Remix IDE
@@ -24,22 +25,57 @@ Before starting, make sure you have:
 
 ---
 
-## 🚀 Step 1: Setting Up the Environment
+## 🚀 Step 1: Creating and Deploying an ERC20 Token
+Before building the savings contract, you need to **deploy your own ERC20 token**. Follow these steps:
+
 ### 🔹 Open Remix IDE
 1. Go to [Remix Ethereum IDE](https://remix.ethereum.org).
 2. Click on **File Explorer** (📁 icon) in the left sidebar.
-3. Click **New File** and name it **`SavingsAccount.sol`**.
+3. Click **New File** and name it **`MyToken.sol`**.
+
+### 🔹 Copy and Paste the Following Code
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+contract MyToken is ERC20 {
+    constructor(uint256 initialSupply) ERC20("MyToken", "MTK") {
+        _mint(msg.sender, initialSupply * (10 ** decimals()));
+    }
+}
+```
+
+### 🔹 Steps to Deploy
+1. Click on the **Solidity Compiler** tab (🛠 icon) in the left sidebar.
+2. Select **Compiler version `0.8.20`**.
+3. Click **Compile MyToken.sol** (🔨).
+4. Go to the **Deploy & Run Transactions** tab (🚀 icon).
+5. Select **JavaScript VM (London)** as the environment.
+6. Enter an initial supply (e.g., `1000000`) in the constructor field.
+7. Click **Deploy**.
+
+**✅ Expected Output:** Your token contract will be deployed, and the address will be displayed.
 
 ---
 
-## 📝 Step 2: Writing the Smart Contract
-Copy and paste the following **starter code** into your `SavingsAccount.sol` file:
+## 🚀 Step 2: Writing the Savings Account Contract
+Now that you have deployed your ERC20 token, use it in your **Savings Account Contract**.
+
+### 🔹 Open Remix and Create a New File
+1. Click **File Explorer** in Remix.
+2. Create a new file called **`SavingsAccount.sol`**.
+3. Copy and paste the following contract:
 
 ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 contract SavingsAccount {
+    IERC20 public token;
     mapping(address => uint256) private balances;
     uint256 public interestRate = 5; // 5% annual interest
     address private owner;
@@ -52,14 +88,17 @@ contract SavingsAccount {
         _;
     }
 
-    constructor() {
+    constructor(address _tokenAddress) {
         owner = msg.sender;
+        token = IERC20(_tokenAddress);
     }
 
-    function deposit() external payable {
-        require(msg.value > 0, "Deposit must be greater than zero");
-        balances[msg.sender] += msg.value;
-        emit Deposited(msg.sender, msg.value);
+    function deposit(uint256 amount) external {
+        require(amount > 0, "Deposit must be greater than zero");
+        require(token.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+        
+        balances[msg.sender] += amount;
+        emit Deposited(msg.sender, amount);
     }
 
     function checkBalance() external view returns (uint256) {
@@ -71,8 +110,8 @@ contract SavingsAccount {
         require(balances[msg.sender] >= amount, "Insufficient balance");
 
         balances[msg.sender] -= amount;
-        payable(msg.sender).transfer(amount);
-
+        require(token.transfer(msg.sender, amount), "Transfer failed");
+        
         emit Withdrawn(msg.sender, amount);
     }
 
@@ -86,31 +125,23 @@ contract SavingsAccount {
 
 ---
 
-## 🛠 Step 3: Compiling the Contract
-1. Click on the **Solidity Compiler** tab (🛠 icon on the left sidebar).
-2. Select the **compiler version `0.8.20`**.
-3. Click **Compile SavingsAccount.sol** (🔨).
+## 🛠 Step 3: Deploying the Savings Contract
+1. Click on the **Solidity Compiler** tab and compile `SavingsAccount.sol`.
+2. Go to **Deploy & Run Transactions**.
+3. In the constructor field, enter the **address of the ERC20 token you deployed earlier**.
+4. Click **Deploy**.
 
-**✅ Expected Output:** You should see **"Compilation successful"** with no errors.
-
----
-
-## 🚀 Step 4: Deploying the Contract
-1. Click the **Deploy & Run Transactions** tab (🚀 icon on the left sidebar).
-2. Under **Environment**, select **"JavaScript VM (London)"**.
-3. Click **Deploy**.
-
-**✅ Expected Output:** Your contract should appear under "Deployed Contracts" in Remix.
+**✅ Expected Output:** The contract should deploy successfully.
 
 ---
 
-## 🎯 Step 5: Interacting with the Contract
-Now, let's **test** each function:
+## 🎯 Step 4: Interacting with the Contract
 
-### 🔹 1. Deposit ETH
+### 🔹 1. Approve and Deposit Tokens
+- First, approve the contract to spend tokens on your behalf using `approve()` from your ERC20 contract.
 - Expand the deployed **SavingsAccount** contract.
 - Locate the **deposit()** function.
-- Enter an amount (e.g., **1 ETH**) in the **Value** field (above the function list).
+- Enter an amount (e.g., **100 tokens**).
 - Click **transact**.
 
 **✅ Expected Output:**  
@@ -123,13 +154,13 @@ Now, let's **test** each function:
 - Click on `checkBalance()`.
 
 **✅ Expected Output:**  
-- It should return **1 ETH** (or the amount deposited).
+- It should return **100 tokens** (or the amount deposited).
 
 ---
 
-### 🔹 3. Withdraw ETH
+### 🔹 3. Withdraw Tokens
 - Locate `withdraw(uint256 amount)`.
-- Enter **0.5 ETH**.
+- Enter **50 tokens**.
 - Click **transact**.
 
 **✅ Expected Output:**  
@@ -139,13 +170,7 @@ Now, let's **test** each function:
 
 ---
 
-### 🔹 4. Apply Interest (Advanced)
-- Only the **owner** can call `applyInterest()`.
-- Once implemented, this should increase all user balances by 5%.
-
----
-
-## 📩 Step 6: Submitting Your Assignment
+## 📩 Step 5: Submitting Your Assignment
 To complete the assignment:
 1. **Submit your modified Solidity code**.
 2. **Include screenshots** of your Remix transactions.
@@ -158,40 +183,16 @@ To complete the assignment:
 ## 📊 Grading Criteria
 | Criteria | Points |
 |----------|--------|
-| `deposit()`, `checkBalance()`, and `withdraw()` work correctly | 50 |
+| ERC20 Token successfully deployed | 20 |
+| `deposit()`, `checkBalance()`, and `withdraw()` work correctly | 40 |
 | Events are emitted properly | 10 |
 | `onlyOwner` and interest function implemented correctly | 20 |
 | Code readability (comments, clean structure) | 10 |
-| Successfully tested and submitted results | 10 |
 
 **Total: 100 Points**
 
 ---
 
-## 🤔 FAQ
-### 1️⃣ Can I test this with real ETH?
-No, Remix uses a **simulated Ethereum environment**. No real ETH is involved.
-
-### 2️⃣ What happens if I withdraw more than my balance?
-The contract prevents this using a **require()** statement.
-
-### 3️⃣ Why is the interest function not working?
-You need to **implement logic** inside the loop. Hint: Iterate over users and apply interest.
-
----
-
 ## 🎯 Summary
-🎉 Congratulations! You’ve successfully:
-- **Written** and **deployed** a Solidity smart contract.
-- **Interacted** with the Ethereum Virtual Machine (EVM).
-- **Used require statements, mappings, and events**.
-- **Learned security principles** like preventing overdraws.
-- **Understood the fundamentals of Solidity**.
-
-💡 **Next Steps:** Try modifying the contract to:
-- Implement **penalties for early withdrawals**.
-- Add **a minimum deposit requirement**.
-- Enable **compound interest** calculations.
-
-🚀 **Great job! Keep building!** 💪🔥
+🎉 Congratulations! You’ve successfully deployed an ERC20 token and built a savings account contract that interacts with it. 🚀
 
